@@ -53,6 +53,22 @@ jobs:
             git push
           fi
 
+      - name: Sync to Aliyun OSS（国内数据源）
+        env:
+          OSS_KEY_ID: ${{ secrets.OSS_KEY_ID }}
+          OSS_KEY_SECRET: ${{ secrets.OSS_KEY_SECRET }}
+        run: |
+          if [ -z "$OSS_KEY_ID" ] || [ -z "$OSS_KEY_SECRET" ]; then
+            echo "未配置 OSS_KEY_ID / OSS_KEY_SECRET，跳过 OSS 同步"
+            exit 0
+          fi
+          pip install oss2
+          python scripts/upload_oss.py \
+            --endpoint https://oss-cn-hangzhou.aliyuncs.com \
+            --bucket webfox \
+            reflections.json index.html
+          echo "OSS 国内源已更新: https://webfox.oss-cn-hangzhou.aliyuncs.com/reflections.json"
+
       - name: Summary
         if: always()
         run: |
