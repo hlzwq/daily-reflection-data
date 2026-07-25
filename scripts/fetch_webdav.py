@@ -105,6 +105,55 @@ def get_file(base: str, href: str, headers: dict) -> bytes:
         raise RuntimeError(f"GET {href} 失败: HTTP {e.code}") from e
 
 
+def probe_list(base: str, headers: dict, dir_path: str, depth: int, max_depth: int) -> None:
+    """递归列出 WebDAV 目录树（诊断用）：路径 404 时定位 -A Daily 的真实位置。"""
+    indent = "  " * depth
+    safe_dir = dir_path.strip("/")
+    if safe_dir:
+        url = base.rstrip("/") + "/" + "/".join(
+            urllib.parse.quote(s, safe="") for s in safe_dir.split("/")
+        ) + "/"
+    else:
+        url = base.rstrip("/") + "/"
+    body = (
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/></d:prop></d:propfind>'
+    )
+    req = urllib.request.Request(
+        url, data=body.encode("utf-8"), method="PROPFIND",
+        headers={**headers, "Depth": "1", "Content-Type": "application/xml"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            xml_data = resp.read().decode("utf-8")
+    except Exception as e:
+        print(f"{indent}[列 {dir_path or '/'} 失败: {e}]")
+        return
+    try:
+        root = ET.fromstring(xml_data)
+    except ET.ParseError:
+        print(f"{indent}[{dir_path or '/'} XML 解析失败]")
+        return
+    self_last = safe_dir.split("/")[-1] if safe_dir else ""
+    found_any = False
+    for resp_el in root:
+        href_el = resp_el.find("{DAV:}href")
+        if href_el is None or not href_el.text:
+            continue
+        raw = href_el.text.strip()
+        name = urllib.parse.unquote(raw.rstrip("/").split("/")[-1])
+        if not name or name == self_last:
+            continue
+        found_any = True
+        is_dir = resp_el.find(".//{DAV:}collection") is not None
+        print(f"{indent}- {name}{'/' if is_dir else ''}")
+        if is_dir and depth < max_depth:
+            child = (dir_path + "/" + name).strip("/")
+            probe_list(base, headers, child, depth + 1, max_depth)
+    if not found_any:
+        print(f"{indent}(空)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="从 WebDAV 拉取当月反思 md")
     parser.add_argument("--out", required=True, help="本地输出目录")
@@ -129,7 +178,14 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     headers = auth_header(user, pwd)
-    hrefs = propfind(base, month_dir, headers)
+    try:
+        hrefs = propfind(base, month_dir, headers)
+    except RuntimeError as e:
+        print(f"[error] {e}")
+        print(f"[info] WEBDAV_BASE={base}")
+        print("[probe] 列出 WebDAV 根目录树（深度2）以定位 -A Daily 的实际路径：")
+        probe_list(base, headers, "", 0, 2)
+        sys.exit(1)
     md_count = 0
     for raw_href in hrefs:
         name = urllib.parse.unquote(raw_href.rstrip("/").split("/")[-1])
