@@ -32,9 +32,12 @@ CST = timezone(timedelta(hours=8))
 
 
 def current_month_dir() -> str:
-    """当月目录名，如 -A Daily/2026-7（月份不补零，与 Obsidian 目录规范一致）。"""
+    """当月目录名，如 action/-A Daily/2026-7（月份不补零）。
+    WebDAV 根下 vault 挂在 action/ 子目录；前缀可用环境变量 WEBDAV_VAULT_PREFIX 覆盖。"""
     now = datetime.now(CST)
-    return f"-A Daily/{now.year}-{now.month}"
+    prefix = os.environ.get("WEBDAV_VAULT_PREFIX", "action").strip("/")
+    base = (prefix + "/") if prefix else ""
+    return f"{base}-A Daily/{now.year}-{now.month}"
 
 
 def auth_header(user: str, pwd: str) -> dict:
