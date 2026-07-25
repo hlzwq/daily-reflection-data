@@ -1,0 +1,64 @@
+name: sync-reflections
+
+# 每天北京时间 09:00（= UTC 01:00）自动同步当月反思；
+# 也可在 Actions 页面手动 Run workflow。
+# 全程在 GitHub 服务器跑，不依赖本地电脑开机。
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 避免定时触发和手动触发同时跑造成冲突
+concurrency:
+  group: sync-reflections
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+      WEBDAV_BASE: https://higa.teracloud.jp/dav/
+      WEBDAV_USER: ${{ secrets.WEBDAV_USER }}
+      WEBDAV_PASSWORD: ${{ secrets.WEBDAV_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Fetch current month from WebDAV
+        run: python scripts/fetch_webdav.py --out sources
+
+      - name: Build reflections.json
+        run: python scripts/build_reflection_app.py --workspace sources
+
+      - name: Publish artifacts
+        run: |
+          cp sources/reflections.json ./reflections.json
+          cp sources/reflections.html ./index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reflections.json index.html
+          if git diff --cached --quiet; then
+            echo "无变化，跳过提交"
+          else
+            git commit -m "chore: update reflections (auto)"
+            git push
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## sync-reflections" >> $GITHUB_STEP_SUMMARY
+          if [ -f reflections.json ]; then
+            python -c "import json;d=json.load(open('reflections.json'));print(f'- 条数: {d[\"count\"]}\\n- updatedAt: {d[\"updatedAt\"]}')" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- 未生成 reflections.json，请检查上方日志" >> $GITHUB_STEP_SUMMARY
+          fi

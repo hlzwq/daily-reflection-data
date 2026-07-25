@@ -1,0 +1,10 @@
+# 反思 md 只在 Actions 运行时临时拉到 sources/，不进仓库（保护隐私）
+sources/
+
+# Python
+__pycache__/
+*.pyc
+
+# 本地 deploy 配置（无需公开到 data 仓库）
+deploy.config.json
+deploy.config.example.json
