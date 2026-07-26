@@ -1,29 +1,32 @@
-name: sync-reflections
+﻿name: sync-reflections
 
-# 每天北京时间 09:00（= UTC 01:00）自动同步当月反思；
-# 也可在 Actions 页面手动 Run workflow。
-# 全程在 GitHub 服务器跑，不依赖本地电脑开机。
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: "*/15 * * * *"
   workflow_dispatch:
+  repository_dispatch:
+    types: [reflection-updated]
 
 permissions:
   contents: write
 
-# 避免定时触发和手动触发同时跑造成冲突
 concurrency:
   group: sync-reflections
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       TZ: Asia/Shanghai
       WEBDAV_BASE: https://higa.teracloud.jp/dav/
       WEBDAV_USER: ${{ secrets.WEBDAV_USER }}
       WEBDAV_PASSWORD: ${{ secrets.WEBDAV_PASSWORD }}
+      WEBDAV_VAULT_PREFIX: ${{ secrets.WEBDAV_VAULT_PREFIX }}
+      FEED_WINDOW_MONTHS: ${{ secrets.FEED_WINDOW_MONTHS }}
+      OSS_KEY_ID: ${{ secrets.OSS_KEY_ID }}
+      OSS_KEY_SECRET: ${{ secrets.OSS_KEY_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,50 +34,59 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.12"
 
-      - name: Fetch current month from WebDAV
-        run: python scripts/fetch_webdav.py --out sources
-
-      - name: Build reflections.json
-        run: python scripts/build_reflection_app.py --workspace sources
-
-      - name: Publish artifacts
+      - name: Fetch rolling months from WebDAV
         run: |
-          cp sources/reflections.json ./reflections.json
-          cp sources/reflections.html ./index.html
+          set -e
+          MONTHS="${FEED_WINDOW_MONTHS:-2}"
+          python scripts/fetch_webdav.py --out sources --months "$MONTHS"
+          echo "=== sources tree ==="
+          find sources -type f -name "*.md" | head -100 || true
+
+      - name: Build reflections.json (schema v2)
+        run: |
+          set -e
+          cp scripts/feed.config.json ./feed.config.json
+          python scripts/build_reflection_app.py --workspace sources --out-dir .
+          test -f reflections.json
+          python - <<'PY'
+          import json
+          d=json.load(open("reflections.json",encoding="utf-8"))
+          print("schema", d.get("schemaVersion"), "days", d.get("count"), "docs", d.get("docCount"), "window", d.get("window"))
+          dates=[x.get("date") for x in d.get("days") or []]
+          print("has_2026-07-27", "2026-07-27" in dates)
+          for day in d.get("days") or []:
+              if day.get("date") in ("2026-07-26","2026-07-27"):
+                  for doc in day.get("docs") or []:
+                      print(" ", day["date"], doc.get("type"), doc.get("filename"))
+          PY
+
+      - name: Commit feed if changed
+        run: |
+          set -e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reflections.json index.html
-          if git diff --cached --quiet; then
-            echo "无变化，跳过提交"
+          if [ -f reflections.html ] && [ ! -f index.html ]; then cp reflections.html index.html; fi
+          git add reflections.json
+          [ -f reflections.html ] && git add reflections.html || true
+          [ -f index.html ] && git add index.html || true
+          if git diff --staged --quiet; then
+            echo "No feed changes"
           else
-            git commit -m "chore: update reflections (auto)"
+            git commit -m "chore: sync reflections from WebDAV $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
 
-      - name: Sync to Aliyun OSS（国内数据源）
-        env:
-          OSS_KEY_ID: ${{ secrets.OSS_KEY_ID }}
-          OSS_KEY_SECRET: ${{ secrets.OSS_KEY_SECRET }}
+      - name: Upload to Aliyun OSS
         run: |
+          set -e
           if [ -z "$OSS_KEY_ID" ] || [ -z "$OSS_KEY_SECRET" ]; then
-            echo "未配置 OSS_KEY_ID / OSS_KEY_SECRET，跳过 OSS 同步"
+            echo "OSS secrets missing; skip"
             exit 0
           fi
           pip install oss2
-          python scripts/upload_oss.py \
-            --endpoint https://oss-cn-hangzhou.aliyuncs.com \
-            --bucket webfox \
-            reflections.json index.html
-          echo "OSS 国内源已更新: https://webfox.oss-cn-hangzhou.aliyuncs.com/reflections.json"
-
-      - name: Summary
-        if: always()
-        run: |
-          echo "## sync-reflections" >> $GITHUB_STEP_SUMMARY
-          if [ -f reflections.json ]; then
-            python -c "import json;d=json.load(open('reflections.json'));print(f'- 条数: {d[\"count\"]}\\n- updatedAt: {d[\"updatedAt\"]}')" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- 未生成 reflections.json，请检查上方日志" >> $GITHUB_STEP_SUMMARY
-          fi
+          FILES="reflections.json"
+          [ -f reflections.html ] && FILES="$FILES reflections.html"
+          [ -f index.html ] && FILES="$FILES index.html"
+          python scripts/upload_oss.py --endpoint https://oss-cn-hangzhou.aliyuncs.com --bucket webfox $FILES

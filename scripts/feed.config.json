@@ -1,0 +1,51 @@
+{
+  "vault_root": "..",
+  "month_dir_regex": "^\\d{4}-\\d{1,2}$",
+  "window": {
+    "mode": "rolling",
+    "months": 2
+  },
+  "inclusion": {
+    "require_date_prefix": true,
+    "patterns": [
+      {
+        "pattern": "*-每日反思*.md",
+        "type": "daily_reflection",
+        "label": "每日反思"
+      },
+      {
+        "pattern": "*-reflection.md",
+        "type": "structured_reflection",
+        "label": "结构化反思"
+      },
+      {
+        "pattern": "*小程序*.md",
+        "type": "miniprogram_note",
+        "label": "小程序"
+      }
+    ],
+    "exclude_patterns": [
+      "reflections.*",
+      "deploy.*",
+      "*temp*",
+      "*草稿*"
+    ]
+  },
+  "exclude_dirs": [
+    "miniprogram",
+    "cloud-sync",
+    "__pycache__",
+    "kaiqi",
+    "采购管理"
+  ],
+  "output": {
+    "remote_json": "reflections.json",
+    "offline_js": "miniprogram/data/reflections.js",
+    "offline_max_days": 30
+  },
+  "type_order": [
+    "daily_reflection",
+    "structured_reflection",
+    "miniprogram_note"
+  ]
+}
