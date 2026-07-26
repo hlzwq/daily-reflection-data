@@ -39,8 +39,14 @@ MONTH_DIR_RE = re.compile(r"^(\d{4})-(\d{1,2})$")
 
 
 def vault_base_path() -> str:
-    """如 action/-A Daily"""
-    prefix = os.environ.get("WEBDAV_VAULT_PREFIX", "action").strip("/")
+    """如 action/-A Daily。
+    注意：GitHub Actions 里未配置的 secret 常以空字符串注入，
+    不能用 getenv 默认值（空串会盖掉 default）。"""
+    raw = os.environ.get("WEBDAV_VAULT_PREFIX")
+    if raw is None or not str(raw).strip():
+        prefix = "action"
+    else:
+        prefix = str(raw).strip().strip("/")
     base = (prefix + "/") if prefix else ""
     return f"{base}-A Daily"
 
@@ -270,7 +276,11 @@ def main() -> None:
 
     n_months = args.months
     if n_months is None:
-        n_months = int(os.environ.get("FEED_WINDOW_MONTHS", "2") or "2")
+        raw_m = os.environ.get("FEED_WINDOW_MONTHS")
+        if raw_m is None or not str(raw_m).strip():
+            n_months = 2
+        else:
+            n_months = int(str(raw_m).strip())
 
     print(f"=== WebDAV 滚动 {n_months} 月拉取 (vault={vault}) ===")
     try:

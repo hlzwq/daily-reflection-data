@@ -1,4 +1,4 @@
-﻿name: sync-reflections
+name: sync-reflections
 
 on:
   schedule:
@@ -23,8 +23,6 @@ jobs:
       WEBDAV_BASE: https://higa.teracloud.jp/dav/
       WEBDAV_USER: ${{ secrets.WEBDAV_USER }}
       WEBDAV_PASSWORD: ${{ secrets.WEBDAV_PASSWORD }}
-      WEBDAV_VAULT_PREFIX: ${{ secrets.WEBDAV_VAULT_PREFIX }}
-      FEED_WINDOW_MONTHS: ${{ secrets.FEED_WINDOW_MONTHS }}
       OSS_KEY_ID: ${{ secrets.OSS_KEY_ID }}
       OSS_KEY_SECRET: ${{ secrets.OSS_KEY_SECRET }}
     steps:
@@ -39,10 +37,10 @@ jobs:
       - name: Fetch rolling months from WebDAV
         run: |
           set -e
-          MONTHS="${FEED_WINDOW_MONTHS:-2}"
+          MONTHS=2
+          echo "MONTHS=$MONTHS WEBDAV_VAULT_PREFIX default=action (empty secret ignored in Python)"
           python scripts/fetch_webdav.py --out sources --months "$MONTHS"
-          echo "=== sources tree ==="
-          find sources -type f -name "*.md" | head -100 || true
+          find sources -type f -name "*.md" | head -80 || true
 
       - name: Build reflections.json (schema v2)
         run: |
