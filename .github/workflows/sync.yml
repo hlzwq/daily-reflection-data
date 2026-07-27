@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -38,11 +40,12 @@ jobs:
         run: |
           set -e
           MONTHS=2
-          echo "MONTHS=$MONTHS WEBDAV_VAULT_PREFIX default=action (empty secret ignored in Python)"
+          echo "MONTHS=$MONTHS"
           python scripts/fetch_webdav.py --out sources --months "$MONTHS"
           find sources -type f -name "*.md" | head -80 || true
 
       - name: Build reflections.json (schema v2)
+        id: build
         run: |
           set -e
           cp scripts/feed.config.json ./feed.config.json
@@ -51,32 +54,17 @@ jobs:
           python - <<'PY'
           import json
           d=json.load(open("reflections.json",encoding="utf-8"))
-          print("schema", d.get("schemaVersion"), "days", d.get("count"), "docs", d.get("docCount"), "window", d.get("window"))
-          dates=[x.get("date") for x in d.get("days") or []]
-          print("has_2026-07-27", "2026-07-27" in dates)
+          print("schema", d.get("schemaVersion"), "days", d.get("count"), "docs", d.get("docCount"))
+          print("updatedAt", d.get("updatedAt"))
           for day in d.get("days") or []:
-              if day.get("date") in ("2026-07-26","2026-07-27"):
+              if day.get("date") and day.get("date") >= "2026-07-26":
                   for doc in day.get("docs") or []:
-                      print(" ", day["date"], doc.get("type"), doc.get("filename"))
+                      print(day.get("date"), doc.get("type"), doc.get("filename"))
           PY
-
-      - name: Commit feed if changed
-        run: |
-          set -e
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -f reflections.html ] && [ ! -f index.html ]; then cp reflections.html index.html; fi
-          git add reflections.json
-          [ -f reflections.html ] && git add reflections.html || true
-          [ -f index.html ] && git add index.html || true
-          if git diff --staged --quiet; then
-            echo "No feed changes"
-          else
-            git commit -m "chore: sync reflections from WebDAV $(date -u +%Y-%m-%dT%H:%MZ)"
-            git push
-          fi
 
       - name: Upload to Aliyun OSS
+        if: success()
         run: |
           set -e
           if [ -z "$OSS_KEY_ID" ] || [ -z "$OSS_KEY_SECRET" ]; then
@@ -88,3 +76,22 @@ jobs:
           [ -f reflections.html ] && FILES="$FILES reflections.html"
           [ -f index.html ] && FILES="$FILES index.html"
           python scripts/upload_oss.py --endpoint https://oss-cn-hangzhou.aliyuncs.com --bucket webfox $FILES
+
+      - name: Commit feed if changed
+        if: success()
+        continue-on-error: true
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reflections.json
+          [ -f reflections.html ] && git add reflections.html || true
+          [ -f index.html ] && git add index.html || true
+          if git diff --staged --quiet; then
+            echo "No feed changes"
+            exit 0
+          fi
+          git commit -m "chore: sync reflections from WebDAV $(date -u +%Y-%m-%dT%H:%MZ)" || true
+          git fetch origin main
+          git pull --rebase origin main || true
+          git push origin HEAD:main
