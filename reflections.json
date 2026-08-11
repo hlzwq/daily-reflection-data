@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-11T13:10:47Z",
+  "updatedAt": "2026-08-11T13:39:06Z",
   "window": {
     "months": [
       "2026-7",
@@ -10,7 +10,7 @@
     "size": 2
   },
   "count": 41,
-  "docCount": 89,
+  "docCount": 90,
   "days": [
     {
       "date": "2026-07-01",
@@ -1316,9 +1316,19 @@
           "tags": [],
           "filename": "2026-8-11-reflection.md",
           "content": "# 每日反思｜2026-08-11\n\n## 检查点\n\n07:00 cron 触发。8/10 反思已覆盖全部对话（Codex rank + 咖啡店text-cognitive），无新有效事件。\n\n8/10 反思动作（合并上传+触发为单脚本）今日提前执行——不等小程序上传触发，先写好脚本。下次小程序上传时直接调用，验证合并效果。\n\n对话十条规则：8/10 两次回复均合规，观察期延续至第三天。仍未覆盖下午/晚间对话。\n\n待确认项清零——无滞留超过3天的项。"
+        },
+        {
+          "id": "2026-08-11-miniprogram_note-0",
+          "type": "miniprogram_note",
+          "label": "小程序",
+          "title": "小程序-能力弹性化作业试发",
+          "summary": "﻿# 能力弹性化作业试发",
+          "tags": [],
+          "filename": "2026-8-11-小程序-能力弹性化作业试发.md",
+          "content": "﻿# 能力弹性化作业试发\n\n> 本篇用于验证 miniprogram-publish 技能：硬 CLI 合并 WebDAV PUT 与 repository_dispatch。\n\n## 一句话\n\n把反复做的发布动作，磨成一把自己的刀：Skill 管判断，CLI 管 201/204。\n\n## 管道作业摘录\n\n- 第一级 rg「软硬结合」：23 行\n- 第二级 fzf 筛 CLI：17 行\n\n## 验收\n\n- dry-run 通过\n- dispatch HTTP 204（本机 gh 已登录）\n"
         }
       ],
-      "docCount": 2
+      "docCount": 3
     }
   ],
   "reflections": [
@@ -3060,9 +3070,19 @@
           "tags": [],
           "filename": "2026-8-11-reflection.md",
           "content": "# 每日反思｜2026-08-11\n\n## 检查点\n\n07:00 cron 触发。8/10 反思已覆盖全部对话（Codex rank + 咖啡店text-cognitive），无新有效事件。\n\n8/10 反思动作（合并上传+触发为单脚本）今日提前执行——不等小程序上传触发，先写好脚本。下次小程序上传时直接调用，验证合并效果。\n\n对话十条规则：8/10 两次回复均合规，观察期延续至第三天。仍未覆盖下午/晚间对话。\n\n待确认项清零——无滞留超过3天的项。"
+        },
+        {
+          "id": "2026-08-11-miniprogram_note-0",
+          "type": "miniprogram_note",
+          "label": "小程序",
+          "title": "小程序-能力弹性化作业试发",
+          "summary": "﻿# 能力弹性化作业试发",
+          "tags": [],
+          "filename": "2026-8-11-小程序-能力弹性化作业试发.md",
+          "content": "﻿# 能力弹性化作业试发\n\n> 本篇用于验证 miniprogram-publish 技能：硬 CLI 合并 WebDAV PUT 与 repository_dispatch。\n\n## 一句话\n\n把反复做的发布动作，磨成一把自己的刀：Skill 管判断，CLI 管 201/204。\n\n## 管道作业摘录\n\n- 第一级 rg「软硬结合」：23 行\n- 第二级 fzf 筛 CLI：17 行\n\n## 验收\n\n- dry-run 通过\n- dispatch HTTP 204（本机 gh 已登录）\n"
         }
       ],
-      "docCount": 2
+      "docCount": 3
     }
   ]
 }
