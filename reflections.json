@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-29T21:14:21Z",
+  "updatedAt": "2026-08-29T23:19:18Z",
   "window": {
     "months": [
       "2026-7",
@@ -9,8 +9,8 @@
     "mode": "rolling",
     "size": 2
   },
-  "count": 58,
-  "docCount": 131,
+  "count": 59,
+  "docCount": 132,
   "days": [
     {
       "date": "2026-07-01",
@@ -1883,6 +1883,22 @@
         }
       ],
       "docCount": 2
+    },
+    {
+      "date": "2026-08-29",
+      "docs": [
+        {
+          "id": "2026-08-29-daily_reflection-0",
+          "type": "daily_reflection",
+          "label": "每日反思",
+          "title": "2026-08-29 每日反思（周六）",
+          "summary": "1. memory/2026-08-29.md — 仅含 07:05 反思 cron 自身记录，无花栖老师对话 2. sessions_list（活跃 + 48h）— 0 个会话 3. workspace git log — 无提交（仓库从未有 commit，此源长期为空，仅作弱证据） 4. WebDAV -A Daily/2026-8/ — 最新文件为 2...",
+          "tags": [],
+          "filename": "2026-08-29-每日反思.md",
+          "content": "# 2026-08-29 每日反思（周六）\n\n## 昨日数据源检查（4 源）\n\n1. memory/2026-08-29.md — 仅含 07:05 反思 cron 自身记录，无花栖老师对话\n2. sessions_list（活跃 + 48h）— 0 个会话\n3. workspace git log — 无提交（仓库从未有 commit，此源长期为空，仅作弱证据）\n4. WebDAV -A Daily/2026-8/ — 最新文件为 2026-08-28-每日反思.md，8-29 无新增\n\n**结论**：昨日（周六）无对话，按反「空转填充」规则不编造薄弱点。\n\n## 唯一待办追踪（非编造，来自 8-29 cron 日志）\n\n- GitHub PAT 401：8-29 晨间反思的 repository_dispatch 触发失败（重试 1 次仍 401），小程序同步未触发。等待花栖老师提供新 token 或确认依赖定时任务兜底。今日写入后仍会尝试触发一次。\n\n## 今日推荐阅读（主题锚定《系统之美》）\n\n继续 Meadows 第 5-6 章（系统之危与陷阱 / 系统杠杆点）——保持主题锁定，不为空日偏离。\n"
+        }
+      ],
+      "docCount": 1
     }
   ],
   "reflections": [
@@ -4345,6 +4361,29 @@
         }
       ],
       "docCount": 2
+    },
+    {
+      "date": "2026-08-29",
+      "summary": "1. memory/2026-08-29.md — 仅含 07:05 反思 cron 自身记录，无花栖老师对话 2. sessions_list（活跃 + 48h）— 0 个会话 3. workspace git log — 无提交（仓库从未有 commit，此源长期为空，仅作弱证据） 4. WebDAV -A Daily/2026-8/ — 最新文件为 2...",
+      "tags": [],
+      "content": "# 2026-08-29 每日反思（周六）\n\n## 昨日数据源检查（4 源）\n\n1. memory/2026-08-29.md — 仅含 07:05 反思 cron 自身记录，无花栖老师对话\n2. sessions_list（活跃 + 48h）— 0 个会话\n3. workspace git log — 无提交（仓库从未有 commit，此源长期为空，仅作弱证据）\n4. WebDAV -A Daily/2026-8/ — 最新文件为 2026-08-28-每日反思.md，8-29 无新增\n\n**结论**：昨日（周六）无对话，按反「空转填充」规则不编造薄弱点。\n\n## 唯一待办追踪（非编造，来自 8-29 cron 日志）\n\n- GitHub PAT 401：8-29 晨间反思的 repository_dispatch 触发失败（重试 1 次仍 401），小程序同步未触发。等待花栖老师提供新 token 或确认依赖定时任务兜底。今日写入后仍会尝试触发一次。\n\n## 今日推荐阅读（主题锚定《系统之美》）\n\n继续 Meadows 第 5-6 章（系统之危与陷阱 / 系统杠杆点）——保持主题锁定，不为空日偏离。\n",
+      "hasReflection": false,
+      "reflectionSummary": "",
+      "reflectionTags": [],
+      "reflectionContent": "",
+      "docs": [
+        {
+          "id": "2026-08-29-daily_reflection-0",
+          "type": "daily_reflection",
+          "label": "每日反思",
+          "title": "2026-08-29 每日反思（周六）",
+          "summary": "1. memory/2026-08-29.md — 仅含 07:05 反思 cron 自身记录，无花栖老师对话 2. sessions_list（活跃 + 48h）— 0 个会话 3. workspace git log — 无提交（仓库从未有 commit，此源长期为空，仅作弱证据） 4. WebDAV -A Daily/2026-8/ — 最新文件为 2...",
+          "tags": [],
+          "filename": "2026-08-29-每日反思.md",
+          "content": "# 2026-08-29 每日反思（周六）\n\n## 昨日数据源检查（4 源）\n\n1. memory/2026-08-29.md — 仅含 07:05 反思 cron 自身记录，无花栖老师对话\n2. sessions_list（活跃 + 48h）— 0 个会话\n3. workspace git log — 无提交（仓库从未有 commit，此源长期为空，仅作弱证据）\n4. WebDAV -A Daily/2026-8/ — 最新文件为 2026-08-28-每日反思.md，8-29 无新增\n\n**结论**：昨日（周六）无对话，按反「空转填充」规则不编造薄弱点。\n\n## 唯一待办追踪（非编造，来自 8-29 cron 日志）\n\n- GitHub PAT 401：8-29 晨间反思的 repository_dispatch 触发失败（重试 1 次仍 401），小程序同步未触发。等待花栖老师提供新 token 或确认依赖定时任务兜底。今日写入后仍会尝试触发一次。\n\n## 今日推荐阅读（主题锚定《系统之美》）\n\n继续 Meadows 第 5-6 章（系统之危与陷阱 / 系统杠杆点）——保持主题锁定，不为空日偏离。\n"
+        }
+      ],
+      "docCount": 1
     }
   ]
 }
